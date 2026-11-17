@@ -1,0 +1,128 @@
+### ЛР2 — тестування всіх endpoint'ів (Visual Studio / Rider / VS Code REST Client)
+@baseUrl = http://localhost:5080
+
+### 1. Список клієнтів (пагінація)
+GET {{baseUrl}}/api/customers?page=1&pageSize=5
+
+### 2. Пошук + сортування клієнтів
+GET {{baseUrl}}/api/customers?search=ivan&sortBy=name&desc=true
+
+### 3. Фільтр: клієнти з >= 2 замовленнями, сортування за кількістю
+GET {{baseUrl}}/api/customers?minOrders=2&sortBy=ordersCount&desc=true
+
+### 4. Клієнт за id (200)
+GET {{baseUrl}}/api/customers/1
+
+### 5. Клієнт за id — не знайдено (404)
+GET {{baseUrl}}/api/customers/9999
+
+### 6. Створення клієнта (201 + Location)
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+
+{
+  "fullName": "Олена Бондар",
+  "email": "olena@example.com",
+  "phone": "+380931112233"
+}
+
+### 7. Створення клієнта з невалідними даними (400)
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+
+{
+  "fullName": "О",
+  "email": "not-an-email",
+  "phone": "abc"
+}
+
+### 8. Дублікат email (409)
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+
+{
+  "fullName": "Ще одна Марія",
+  "email": "maria@example.com"
+}
+
+### 9. Оновлення клієнта (200)
+PUT {{baseUrl}}/api/customers/1
+Content-Type: application/json
+
+{
+  "fullName": "Марія Коваленко-Шевчук",
+  "email": "maria@example.com",
+  "phone": "+380509998877"
+}
+
+### 10. Замовлення клієнта (вкладений ресурс)
+GET {{baseUrl}}/api/customers/1/orders
+
+### 11. Список замовлень: фільтр за статусом і сумою, сортування за сумою
+GET {{baseUrl}}/api/orders?status=Paid&minTotal=500&sortBy=total&desc=true
+
+### 12. Пошук замовлень за товаром або клієнтом
+GET {{baseUrl}}/api/orders?search=Клавіатура
+
+### 13. Фільтр за датою
+GET {{baseUrl}}/api/orders?fromDate=2026-01-01&sortBy=date&desc=true
+
+### 14. Невалідний фільтр (minTotal > maxTotal) — 400
+GET {{baseUrl}}/api/orders?minTotal=1000&maxTotal=10
+
+### 15. Замовлення за id (200)
+GET {{baseUrl}}/api/orders/1
+
+### 16. Створення замовлення (201). TotalAmount рахує сервер
+POST {{baseUrl}}/api/orders
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "items": [
+    { "productName": "Кава зернова", "quantity": 2, "unitPrice": 250 },
+    { "productName": "Чашка", "quantity": 1, "unitPrice": 180.5 }
+  ]
+}
+
+### 17. Замовлення для неіснуючого клієнта (400)
+POST {{baseUrl}}/api/orders
+Content-Type: application/json
+
+{
+  "customerId": 9999,
+  "items": [ { "productName": "Тест", "quantity": 1, "unitPrice": 10 } ]
+}
+
+### 18. Невалідні позиції (400)
+POST {{baseUrl}}/api/orders
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "items": [ { "productName": "", "quantity": 0, "unitPrice": -5 } ]
+}
+
+### 19. Оновлення замовлення (200)
+PUT {{baseUrl}}/api/orders/2
+Content-Type: application/json
+
+{
+  "status": "Paid",
+  "items": [ { "productName": "Навушники", "quantity": 2, "unitPrice": 1450 } ]
+}
+
+### 20. Оновлення скасованого замовлення (409)
+PUT {{baseUrl}}/api/orders/4
+Content-Type: application/json
+
+{
+  "status": "New",
+  "items": [ { "productName": "Чай", "quantity": 1, "unitPrice": 100 } ]
+}
+
+### 21. Видалення замовлення (204)
+DELETE {{baseUrl}}/api/orders/5
+
+### 22. Повторне видалення — 404
+DELETE {{baseUrl}}/api/orders/5
